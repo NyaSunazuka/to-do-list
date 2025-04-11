@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class = "container mt-5"> 
+        <h1 class = "text-center">Task Manager</h1>
+
+        <!-- Add Task Form -->
+        <div class ="my-4">
+            <h3>Add New Task</h3>
+            <form id="taskForm">
+                <div class="mb-3">
+                    <label for="taskInput" class="form-lable">Task Name</label>
+                    <input type="text" class="form-control" id="taskInput" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
+        </div>
+
+        <!-- Task List -->
+        <h3>Task List</h3>
+        <ul id="taskList" class="list-group">
+             <!-- List of tasks will be dynamically added here -->
+
+        </ul>
+    </div>
+
+    <!-- Bootstrap JS & Popper.js -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+        const taskForm = document.getElementById("taskForm");
+        const taskInput = document.getElementById("taskInput");
+        const taskList = document.getElementById("taskList");
+        window.addEventListener("DOMContentLoaded", loadTasks);
+
+        function loadTasks() {
+        fetch("/tasks")
+            .then(response => response.json())
+            .then(tasks => {
+                tasks.forEach(task => {
+                    const taskItem = document.createElement("li");
+                    taskItem.classList.add("list-group-item");
+                    taskItem.innerHTML = `
+                        ${task.name}
+                        <button class="btn btn-danger btn-sm float-end ms-2" onclick="deleteTask(this, ${task.id})">Delete</button>
+                    `;
+                    taskList.appendChild(taskItem);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading tasks:", error);
+            });
+    }
+
+
+
+
+        taskForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const taskName = taskInput.value;
+            addTask(taskName);
+            taskInput.value = "";
+        });
+        function addTask(taskName){
+            fetch("/tasks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({name:taskName})
+
+            })
+            .then(response => response.json())
+            .then(data => {
+                const taskItem = document.createElement("li");
+                taskItem.classList.add("list-group-item");
+                taskItem.innerHTML = `
+                    ${taskName}
+                    <button class="btn btn-danger btn-sm float-end ms-2" onclick="deleteTask(this,${data.id})">Delete</button>
+                `;
+                taskList.appendChild(taskItem);
+            })
+            .catch(error => {
+                console.error('Error',error);
+            });
+    
+        }
+
+        function deleteTask(button,taskId) {
+            fetch(`/tasks/${taskId}`,{
+                method: "DELETE"
+            })
+            .then(() => {
+                button.parentElement.remove();
+            })
+            .catch(error => {
+                console.error('Error', error);
+            })
+            const taskItem = button.parentElement;
+        }
+    </script>
+
+
+</body>
+</html>
