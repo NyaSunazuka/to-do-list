@@ -163,7 +163,7 @@ app.get("/check-db", async (req, res) => {
         const result = await pool.query("SELECT NOW()");  // สั่งให้ฐานข้อมูลแสดงเวลาปัจจุบัน
         const result2 = await pool.query("select * from tasks");
         console.log("Database connected:", result.rows[0]); // log เวลาที่ได้จากฐานข้อมูล
-        console.log("result = ", result2); // log เวลาที่ได้จากฐานข้อมูล
+        console.log("result = ", result2); 
         res.status(200).json({ message: "Database connected successfully", time: result.rows[0] });
     } catch (err) {
         console.error("Database connection error:", err);  // log ถ้ามีข้อผิดพลาด
